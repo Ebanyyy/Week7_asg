@@ -1,5 +1,6 @@
 const canvas=document.getElementById('game');
 const ctx=canvas.getContext('2d');
+const snakeParts=[];
 
 let speed=7;
 let tileCount=20;
@@ -10,14 +11,22 @@ let xvelocity=0;
 let yvelocity=0;
 let appleX=5;
 let appleY=5;
+let tailLength=2;
+let score=0;
 
 function drawGame() {
+	changeSnakePosition();
+
+	let result=isGameOver();
+	if(result){
+		return;
+	}
+
 	clearScreen();
 	drawSnake();
-	changeSnakePosition();
 	checkCollision();
 	drawApple();
-	
+	drawScore();
 
 	setTimeout(drawGame, 1000/speed);
 }
@@ -30,6 +39,14 @@ function clearScreen() {
 function drawSnake() {
 	ctx.fillStyle="orange";
 	ctx.fillRect(headX* tileCount, headY* tileCount, tileSize,tileSize)
+	ctx.fillStyle="green";
+
+	for(let i=0;i<snakeParts.length;i++){
+
+		let part=snakeParts[i]
+			ctx.fillRect(part.x *tileCount, part.y *tileCount, tileSize, tileSize)
+	}
+		snakeParts.push(new snakePart(headX,headY));
 }
 
 document.body.addEventListener('keydown', keyDown);
@@ -77,6 +94,61 @@ function checkCollision(){
 		score++;
 	}
 }
+
+class snakePart{
+constructor(x, y){
+	this.x=x;
+	this.y=y;
+}
+}
+
+function drawScore(){
+ctx.fillStyle="white"
+ctx.font="10px verdana"
+ctx.fillText("Score: " +score, canvas.clientWidth-50,10);
+}
+
+function isGameOver(){
+	let gameOver=false;
+
+	if(yvelocity===0 && xvelocity===0){
+		return false;
+	}
+
+	if(headX<0){
+		gameOver=true;
+	}
+
+	else if(headX===tileCount){
+		gameOver=true;
+	}
+
+	else if(headY<0){
+		gameOver=true;
+	}
+
+	else if(headY===tileCount){
+		gameOver=true;
+	}
+
+	for(let i=0; i<snakeParts.length;i++){
+		let part=snakeParts[i];
+		if(part.x===headX && part.y===headY){
+			gameOver=true;
+			break;
+		}
+
+	}
+
+	if(gameOver){
+		ctx.fillStyle="white";
+		ctx.font="50px verdana";
+		ctx.fillText("Game Over!", canvas.clientWidth/6.5, canvas.clientHeight/2);
+	}
+
+	return gameOver;
+}
+
 
 
 
